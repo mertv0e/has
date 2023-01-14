@@ -10,7 +10,7 @@ sudo bash get-docker.sh
 sudo apt install python3-pip -y
 ```
 # Установка ХА
-Создать файл compose.yml со следующим создержимым
+Создать файл ```compose.yml``` со следующим создержимым
 ```yaml
 version: '3'
 services:
@@ -28,10 +28,11 @@ services:
 ```
 docker compose up -d
 ```
-После установки ХА, подкелобчения ЗигБи корнтроллера надо устанвоить ZigBee2mqtt
-
-В моем случае дангл определился как /dev/ttyACM0
+# Установка ZigBee2mqtt
+Для настройки ZigBee2MQTT надо узнать на какой файл ссылается контроллер. В моем случае дангл определился как /dev/ttyACM0
 ```
+# dmesg
+...
 [213856.991755] usb 1-1.4.4: new full-speed USB device number 11 using xhci_hcd
 [213857.107820] usb 1-1.4.4: New USB device found, idVendor=1a86, idProduct=55d4, bcdDevice= 4.42
 [213857.107851] usb 1-1.4.4: New USB device strings: Mfr=1, Product=2, SerialNumber=3
@@ -39,8 +40,57 @@ docker compose up -d
 [213857.107883] usb 1-1.4.4: Manufacturer: ITEAD
 [213857.107897] usb 1-1.4.4: SerialNumber: 20221029154812
 [213857.115415] cdc_acm 1-1.4.4:1.0: ttyACM0: USB ACM device
+...
 ```
-https://www.zigbee2mqtt.io/guide/getting-started/#installation
+Далее создаем copmpose.yml файл
+```yaml
+version: '3.8'
+services:
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    restart: unless-stopped
+    volumes:
+      - "./mosquitto-data:/mosquitto"
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    command: "mosquitto -c /mosquitto-no-auth.conf"
 
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    restart: unless-stopped
+    image: koenkk/zigbee2mqtt
+    volumes:
+      - ./zigbee2mqtt-data:/app/data
+      - /run/udev:/run/udev:ro
+    ports:
+      - 8080:8080
+    environment:
+      - TZ=Europe/Berlin
+    devices:
+      - <ID USB контроллера>:<ID USB контроллера>
+```
+Далее создаем конифгурационный файл ```zigbee2mqtt-data/configuration.yaml```
+```yaml
+# Let new devices join our zigbee network
+permit_join: true
+# Docker-Compose makes the MQTT-Server available using "mqtt" hostname
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://mqtt
+# Zigbee Adapter path
+serial:
+  port: <ID USB контроллера>
+# Enable the Zigbee2MQTT frontend
+frontend:
+  port: 8080
+# Let Zigbee2MQTT generate a new network key on first start
+advanced:
+  network_key: GENERATE
+ ```   
+Поднимаем контейнер
+```
+$ docker-compose up -d
+```
 Активировать ХА интеграцию
 https://www.zigbee2mqtt.io/guide/usage/integrations/home_assistant.html#mqtt-discovery
