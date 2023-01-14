@@ -1,15 +1,15 @@
 # Home Assistant install
 
-# Установка докер
+## Установка докер
 ```
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo bash get-docker.sh
 ```
-# Установка Docker Compose
+## Установка Docker Compose
 ```
 sudo apt install python3-pip -y
 ```
-# Установка ХА
+## Установка ХА
 Создать файл ```compose.yml``` со следующим создержимым
 ```yaml
 version: '3'
@@ -28,10 +28,10 @@ services:
 ```
 docker compose up -d
 ```
-# Установка ZigBee2mqtt
+## Установка ZigBee2mqtt
 Для настройки ZigBee2MQTT надо узнать на какой файл ссылается контроллер. В моем случае дангл определился как /dev/ttyACM0
 ```
-# dmesg
+$ dmesg
 ...
 [213856.991755] usb 1-1.4.4: new full-speed USB device number 11 using xhci_hcd
 [213857.107820] usb 1-1.4.4: New USB device found, idVendor=1a86, idProduct=55d4, bcdDevice= 4.42
@@ -92,5 +92,8 @@ advanced:
 ```
 $ docker-compose up -d
 ```
-Активировать ХА интеграцию
-https://www.zigbee2mqtt.io/guide/usage/integrations/home_assistant.html#mqtt-discovery
+## Активировация интеграции в HA
+
+- В ```configuration.yaml``` Zigbee2MQTT выставить homeassistant: true
+- Установить интеграцию MQTT в Home Assistant
+
