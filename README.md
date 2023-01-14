@@ -94,6 +94,6 @@ $ docker-compose up -d
 ```
 ## Активировация интеграции в HA
 
-- В ```configuration.yaml``` Zigbee2MQTT выставить homeassistant: true
+- В ```configuration.yaml``` Zigbee2MQTT выставить ```homeassistant: true```
 - Установить интеграцию MQTT в Home Assistant
 
